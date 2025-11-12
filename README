@@ -1,0 +1,62 @@
+# Examen Práctico - Sistemas Distribuidos
+
+Este proyecto implementa un sistema de procesamiento dual (procesos e hilos) y un sistema de almacenamiento distribuido (Docker y MongoDB) como parte del examen de Sistemas Distribuidos.
+
+## 📁 Parte 1: Procesamiento Distribuido (Hilos vs Procesos)
+
+Esta parte compara el rendimiento de Hilos contra Procesos para procesar una lista de tareas con dificultad variable.
+
+### 🚀 Ejecución (Parte 1)
+
+1.  Abre una terminal en la raíz del proyecto.
+2.  Ejecuta el script:
+    ```bash
+    python part1-processes-threads/task_processor.py
+    ```
+
+### 📈 Análisis de Resultados (Parte 1)
+
+- **Hilos:** `Tiempo con hilos: 0.50s` (Aprox.)
+- **Procesos:** `Tiempo con procesos: 1.50s` (Aprox.)
+
+**Conclusión:** Para esta simulación, **los hilos son mucho más rápidos**.
+
+La simulación usa `time.sleep()`, que es una operación **I/O-Bound** (limitada por espera). Cuando un hilo ejecuta `time.sleep()`, libera el GIL (Global Interpreter Lock) de Python, permitiendo que otro hilo se ejecute. Esto da como resultado un paralelismo casi real.
+
+Los procesos son más lentos porque crear un proceso nuevo (hacer "fork" o "spawn") es una operación mucho más costosa y pesada para el sistema operativo que crear un hilo.
+
+> **Nota:** Si la tarea fuera **CPU-Bound** (un cálculo matemático pesado), los **Procesos** ganarían, ya que podrían usar múltiples núcleos de CPU simultáneamente, mientras que los hilos se bloquearían entre sí por el GIL.
+
+### 🔒 Cómo se evitan las Condiciones de Carrera
+
+- **En Hilos:** Se usa un `threading.Lock()` (`self.lock`). La sección `with self.lock:` asegura que solo un hilo a la vez pueda acceder y modificar el contador `self.thread_tasks_completed`.
+- **En Procesos:** Se usa un `multiprocessing.Value('i', 0)`. Este objeto tiene su propio `lock` incorporado. La sección `with counter.get_lock():` asegura que solo un proceso a la vez pueda modificar el contador `counter.value`, evitando que los procesos se sobrescriban entre sí.
+
+---
+
+## 📦 Parte 2: Almacenamiento Distribuido (MongoDB)
+
+Esta parte simula un sistema de archivos distribuido usando dos bases de datos MongoDB (mongo1, mongo2) y un cliente de Python (`storage_client`), todos orquestados por Docker.
+
+### 🚀 Ejecución (Parte 2)
+
+1.  Asegúrate de tener Docker Desktop corriendo.
+2.  Abre una terminal en la raíz del proyecto (donde está `docker-compose.yml`).
+3.  Levanta los servicios:
+    ```bash
+    docker-compose up --build -d
+    ```
+4.  El script de Python se ejecuta automáticamente. Para ver los resultados (la distribución de los 100 documentos), revisa los logs del cliente:
+    ```bash
+    docker-compose logs storage_client
+    ```
+5.  **Resultado esperado (Logs):**
+    ```
+    Estadísticas de distribución: {'mongo1': 48, 'mongo2': 52}
+    (Los números pueden variar)
+    ```
+
+### 🔗 Conceptos Aplicados (Parte 2)
+
+- **Distribución de datos:** El script `storage_system.py` distribuye los datos usando `random.choice()`, asignando cada documento nuevo a `mongo1` o `mongo2` al azar.
+- **Transparencia de búsqueda:** El método `find_document()` busca en _todos_ los nodos (`mongo1` y `mongo2`). El usuario no necesita saber dónde está guardado el dato; el sistema lo encuentra por él.
