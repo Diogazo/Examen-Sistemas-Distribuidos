@@ -17,7 +17,7 @@ Esta parte compara el rendimiento de Hilos contra Procesos para procesar una lis
 ### 📈 Análisis de Resultados (Parte 1)
 
 - **Hilos:** `Tiempo con hilos: 0.50s` (Aprox.)
-- **Procesos:** `Tiempo con procesos: 1.50s` (Aprox.)
+- **Procesos:** `Tiempo con procesos: .63s` (Aprox.)
 
 **Conclusión:** Para esta simulación, **los hilos son mucho más rápidos**.
 

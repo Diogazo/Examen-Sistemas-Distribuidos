@@ -21,7 +21,6 @@ class TaskProcessor:
         self.lock = threading.Lock()
 
     def process_task_thread(self, task_id, difficulty):
-        """Simula procesamiento de tarea para hilos"""
         time.sleep(difficulty * 0.1)
 
         # Zona crítica para el contador de hilos

@@ -19,7 +19,7 @@ services:
 
   storage_client:
     build:
-      context: ./part2-distributed-storage
+      context: part2-distributed-storage
     depends_on:
       - mongo1
       - mongo2
